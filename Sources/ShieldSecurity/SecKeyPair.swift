@@ -46,7 +46,7 @@ public struct SecKeyPair {
       return Builder(type: type, keySize: keySize)
     }
 
-    public func generate() throws -> SecKeyPair {
+    public func generate(privateTag: Data, publicTag: Data) throws -> SecKeyPair {
       guard let type = type else { fatalError("missing key type") }
       guard let keySize = keySize else { fatalError("missing key size") }
 
@@ -62,10 +62,8 @@ public struct SecKeyPair {
       }
 
       #if os(iOS) || os(watchOS) || os(tvOS)
-
-        try publicKey!.save(class: kSecAttrKeyClassPublic)
-        try privateKey!.save(class: kSecAttrKeyClassPrivate)
-
+      try publicKey!.save(class: kSecAttrKeyClassPublic,applicationTag: publicTag)
+      try privateKey!.save(class: kSecAttrKeyClassPrivate,applicationTag: privateTag)
       #endif
 
       return SecKeyPair(privateKey: privateKey!, publicKey: publicKey!)
@@ -106,9 +104,9 @@ public struct SecKeyPair {
                                   class: kSecAttrKeyClassPublic)
   }
 
-  public func save() throws {
+  public func save(applicationTag: Data) throws {
 
-    try privateKey.save(class: kSecAttrKeyClassPrivate)
+    try privateKey.save(class: kSecAttrKeyClassPrivate,applicationTag: applicationTag)
     try publicKey.save(class: kSecAttrKeyClassPublic)
   }
 
